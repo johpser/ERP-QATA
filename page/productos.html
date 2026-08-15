@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Catálogo de Productos - QATA ASOCIADOS</title>
+    <link rel="icon" type="image/png" href="../imagenes/icono.png">
+    
+    <script type="module">
+        import { auth } from '../js/config.js';
+        import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        onAuthStateChanged(auth, (user) => {
+            if (!user) window.location.href = '../index.html';
+        });
+    </script>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    
+    <style>
+        body { background-color: #f4f7f6; padding-top: 90px; font-family: 'Segoe UI', sans-serif; }
+        .navbar { background: white; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+        .container-productos { max-width: 1300px; margin: auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 .5rem 1rem rgba(0,0,0,.05); }
+        .search-section { background-color: #f8f9fa; border: 1px solid #dee2e6; border-radius: 10px; padding: 20px; margin-bottom: 25px; position: relative; }
+        .table { font-size: 0.85rem; vertical-align: middle; }
+        .table thead th { background-color: #f8f9fa; font-weight: bold; text-transform: uppercase; font-size: 0.75rem; border-bottom: 2px solid #dee2e6; }
+        .dropdown-menu { border-radius: 12px; border: none; box-shadow: 0 10px 30px rgba(0,0,0,0.1); font-size: 0.9rem; }
+        .dropdown-item i { margin-right: 10px; color: #007bff; }
+        .badge-tipo { font-size: 0.7rem; padding: 4px 8px; border-radius: 10px; background: #e9ecef; color: #0d6efd; font-weight: bold; text-transform: uppercase; }
+    </style>
+</head>
+<body>
+    <header>
+        <nav class="navbar navbar-expand-lg fixed-top">
+            <div class="container-fluid px-4">
+                <a class="navbar-brand" href="#"><img src="../imagenes/LOGOQATA.png" alt="Logo" style="height: 40px;"></a>
+                <div class="ms-auto d-flex align-items-center">
+                    <div class="dropdown me-2">
+                        <button class="btn btn-dark btn-sm rounded-pill px-3 fw-bold dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                            <i class="bi bi-grid-3x3-gap-fill me-1"></i> MENÚ
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end" id="listaMenuDinamico">
+                            <li class="px-3 py-2 text-muted small">Cargando menú...</li>
+                        </ul>
+                    </div>
+                    <button id="btnCerrarSesion" class="btn btn-outline-danger btn-sm rounded-pill px-3 fw-bold">
+                        <i class="bi bi-box-arrow-right me-1"></i> CERRAR SESIÓN
+                    </button>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container-fluid px-md-5">
+        <div class="container-productos">
+            <div class="row mb-4 align-items-center">
+                <div class="col-md-6">
+                    <h3 class="fw-bold text-primary m-0"><i class="bi bi-box-seam"></i> Catálogo de Productos</h3>
+                </div>
+                <div class="col-md-6 text-end">
+                    <button class="btn btn-primary rounded-pill px-4 fw-bold shadow-sm" data-bs-toggle="modal" data-bs-target="#modalNuevoProducto">
+                        <i class="bi bi-plus-lg"></i> NUEVO PRODUCTO
+                    </button>
+                </div>
+            </div>
+
+            <div class="search-section shadow-sm">
+                <div class="row g-3">
+                    <div class="col-md-8">
+                        <div class="input-group">
+                            <span class="input-group-text bg-white"><i class="bi bi-search text-primary"></i></span>
+                            <input type="text" id="inputBuscador" class="form-control form-control-lg" placeholder="Buscar por descripción, código o tipo..." autocomplete="off">
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <select id="filtroTipo" class="form-select form-select-lg fw-bold text-secondary">
+                            <option value="">🔍 TODOS LOS TIPOS</option>
+                            <option value="ELECTRICO">ELECTRICO</option>
+                            <option value="FERRETERIA">FERRETERIA</option>
+                            <option value="EPPS">EPPS</option>
+                            <option value="HERRAMIENTAS">HERRAMIENTAS</option>
+                            <option value="OFICINA">OFICINA</option>
+                            <option value="GENERAL">GENERAL</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-hover border align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th style="width: 150px;" class="text-center">Código</th>
+                            <th style="width: 150px;">Tipo</th>
+                            <th>Descripción del Producto</th>
+                            <th class="text-center" style="width: 100px;">Unidad</th>
+                            <th class="text-center" style="width: 180px;">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tablaProductos">
+                        <tr><td colspan="5" class="text-center py-4 text-muted">Cargando catálogo...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <div class="modal fade" id="modalNuevoProducto" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content shadow border-0" style="border-radius: 15px;">
+                <div class="modal-header border-0 bg-light" style="border-radius: 15px 15px 0 0;">
+                    <h5 class="modal-title fw-bold"><i class="bi bi-tag-fill text-primary"></i> Nuevo Producto</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <form id="formNuevoProducto">
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold text-muted">TIPO DE PRODUCTO</label>
+                            <input type="text" id="newTipo" class="form-control" required placeholder="Ej: Electrico, Ferreteria">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold text-muted">DESCRIPCIÓN COMPLETA</label>
+                            <textarea id="newDescripcion" class="form-control" rows="3" required placeholder="Ej: Cable tierra amarillo 9"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold text-muted">UNIDAD DE MEDIDA</label>
+                            <select id="newUnidad" class="form-select">
+                                <option value="UND">UND - UNIDAD</option>
+                                <option value="MLL">MLL - MILLAR</option>
+                                <option value="GLN">GLN - GALÓN</option>
+                                <option value="MTR">MTR - METRO</option>
+                                <option value="PQT">PQT - PAQUETE</option>
+                                <option value="PAR">PAR - PAR</option>
+                                <option value="KG">KG - KILOGRAMO</option>
+                                <option value="PAR">PAR - PARES</option>
+                                <option value="CAJ">CAJ - CAJA</option>
+                            </select>
+                        </div>
+                        <button type="submit" id="btnGuardarProducto" class="btn btn-primary w-100 fw-bold py-2 shadow-sm">GUARDAR PRODUCTO</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { auth, db } from '../js/config.js';
+        import { signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        const listaMenu = document.getElementById('listaMenuDinamico');
+
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                try {
+                    const docSnap = await getDoc(doc(db, "usuarios", user.uid));
+                    if (docSnap.exists()) {
+                        renderizarMenu(docSnap.data().rol.toLowerCase());
+                    }
+                } catch (error) {
+                    console.error("Error al obtener el rol:", error);
+                }
+            } else {
+                window.location.href = '../index.html';
+            }
+        });
+
+        function renderizarMenu(rol) {
+            let items = `<li><a class="dropdown-item" href="${rol === 'admin' ? 'menu.html' : 'menu2.html'}"><i class="bi bi-house"></i> Inicio</a></li><li><hr class="dropdown-divider"></li>`;
+            
+            if (rol === 'admin') {
+                items += `
+                    <li><a class="dropdown-item" href="requerimiento.html"><i class="bi bi-plus-circle"></i> Generar RQ</a></li>
+                    <li><a class="dropdown-item" href="historial_reque.html"><i class="bi bi-archive"></i> Historial RQ</a></li>
+                    <li><a class="dropdown-item" href="orden.html"><i class="bi bi-cart"></i> Generar OC</a></li>
+                    <li><a class="dropdown-item" href="historial.html"><i class="bi bi-clipboard-data"></i> Historial OC</a></li>
+                    <li><a class="dropdown-item" href="orden_servicio.html"><i class="bi bi-tools"></i> Generar OS</a></li>
+                    <li><a class="dropdown-item" href="historial_os.html"><i class="bi bi-clock-history"></i> Historial OS</a></li>
+                    <li><a class="dropdown-item" href="guia.html"><i class="bi bi-truck"></i> Generar Guía</a></li>
+                    <li><a class="dropdown-item" href="historial2.html"><i class="bi bi-receipt"></i> Historial Guías</a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item" href="productos.html"><i class="bi bi-box-seam"></i> Productos</a></li>
+                    <li><a class="dropdown-item" href="configuracion.html"><i class="bi bi-sliders"></i> Configuración OC / OS</a></li>
+                `;
+            } else {
+                items += `
+                    <li><a class="dropdown-item" href="requerimiento.html"><i class="bi bi-plus-circle"></i> Generar RQ</a></li>
+                    <li><a class="dropdown-item" href="historial_reque.html"><i class="bi bi-archive"></i> Historial RQ</a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item" href="productos.html"><i class="bi bi-box-seam"></i> Productos</a></li>
+                `;
+            }
+            listaMenu.innerHTML = items;
+        }
+
+        document.getElementById('btnCerrarSesion').addEventListener('click', async () => {
+            try {
+                await signOut(auth);
+                window.location.href = '../index.html';
+            } catch (error) {
+                console.error("Error al cerrar sesión:", error);
+            }
+        });
+    </script>
+    <script type="module" src="../js/productos.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

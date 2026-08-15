@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generar Requerimiento - QATA ASOCIADOS</title>
+    <link rel="icon" type="image/png" href="../imagenes/icono.png">
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <style>
+        body { background-color: #f4f7f6; padding-top: 90px; font-family: 'Segoe UI', sans-serif; }
+        
+        /* Navbar Blanco Unificado */
+        .navbar { background: white; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+        
+        .card-req { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.05); }
+        .form-label { font-size: 0.75rem; font-weight: bold; color: #555; text-transform: uppercase; }
+        
+        /* Efecto visual para edición */
+        .fila-editando { background-color: #fff9c4 !important; transition: background-color 0.5s; }
+
+        /* Dropdown Menu Style */
+        .dropdown-menu { border-radius: 12px; border: none; box-shadow: 0 10px 30px rgba(0,0,0,0.1); font-size: 0.9rem; }
+        .dropdown-item { padding: 10px 20px; font-weight: 500; color: #444; }
+        .dropdown-item:hover { background-color: #f8f9fa; color: #007bff; }
+        .dropdown-item i { margin-right: 10px; color: #007bff; }
+    </style>
+</head>
+<body>
+    <header>
+        <nav class="navbar navbar-expand-lg fixed-top">
+            <div class="container-fluid px-4">
+                <a class="navbar-brand" href="#">
+                    <img src="../imagenes/LOGOQATA.png" alt="Logo" style="height: 40px;">
+                </a>
+                
+                <div class="ms-auto d-flex align-items-center">
+                    <!-- Botón MENÚ Dinámico (Negro) -->
+                    <div class="dropdown me-2">
+                        <button class="btn btn-dark btn-sm rounded-pill px-3 fw-bold dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-grid-3x3-gap-fill me-1"></i> MENÚ
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end" id="listaMenuDinamico">
+                            <li class="px-3 py-2 text-muted small">Cargando menú...</li>
+                        </ul>
+                    </div>
+
+                    <!-- Botón SALIR -->
+                    <button id="btnCerrarSesion" class="btn btn-outline-danger btn-sm rounded-pill px-3 fw-bold">
+                        <i class="bi bi-box-arrow-right me-1"></i> CERRAR SESIÓN
+                    </button>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container">
+        <div class="card-req">
+            <h4 class="fw-bold text-primary mb-4"><i class="bi bi-file-earmark-plus"></i> Generar Requerimiento</h4>
+            
+            <div class="row g-3 mb-4 border-bottom pb-4">
+                <div class="col-md-3">
+                    <label class="form-label">Proyecto</label>
+                    <select id="reqProyecto" class="form-select form-select-sm">
+                        <option value="CAMBRIDGE">CAMBRIDGE</option>
+                        <option value="TORRE PRIMA">TORRE PRIMA</option>
+                        <option value="GRID 154">GRID 154</option>
+                        <option value="WYNK">WYNK</option>
+                        <option value="PISO 19A">PISO 19A</option>
+                        <option value="PISO 19B">PISO 19B</option>
+                        <option value="POSVENTA">POSVENTA</option>
+                        <option value="QUALITY">QUALITY</option>
+                        <option value="CORIL">CORIL</option>
+                        <option value="ADMIN">ADMIN</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Solicitado Por</label>
+                    <input type="text" id="reqSolicitante" class="form-control form-control-sm" placeholder="Nombre completo">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Fecha Solicitada</label>
+                    <input type="date" id="reqFechaSolicitada" class="form-control form-control-sm">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Fecha Requerida</label>
+                    <input type="date" id="reqFechaRequerida" class="form-control form-control-sm">
+                </div>
+                <div class="col-md-12">
+                    <label class="form-label">Centro de Costo</label>
+                    <select id="reqCentroCosto" class="form-select form-select-sm">
+                        <option value="">SELECCIONAR...</option>
+                        <option value="M-074_QP-PURUCHUCO">M-074_QP-PURUCHUCO</option>
+                        <option value="M-075_WYNK-LA RAMBLA">M-075_WYNK-LA RAMBLA</option>
+                        <option value="M-067_GRID-EDIF-SM">M-067_GRID-EDIF-SM</option>
+                        <option value="M-066_PRIMA-OFIC-Chinchon">M-066_PRIMA-OFIC-Chinchon</option>
+                        <option value="M-066_PRIMA-2DO PQTE_AD001">M-066_PRIMA-2DO PQTE_AD001</option>
+                        <option value="M-063_OFIC-CAMINO REAL">M-063_OFIC-CAMINO REAL</option>
+                        <option value="M-066_PRIMA-OF-Chinchon_AD043">M-066_PRIMA-OF-Chinchon_AD043</option>
+                        <option value="M-066_PRIMA-COMP-2DO PQTE">M-066_PRIMA-COMP-2DO PQTE</option>
+                        <option value="M-068_CORIL-OFIC-DERBY P19A_AD1">M-068_CORIL-OFIC-DERBY P19A_AD1</option>
+                        <option value="M-068_CORIL-OFIC-DERBY P19B">M-068_CORIL-OFIC-DERBY P19B</option>
+                        <option value="M-068_CORIL-OFIC-DERBY P19A">M-068_CORIL-OFIC-DERBY P19A</option>
+                        <option value="ADMIN">ADMIN</option>
+                        <option value="FUXION">FUXION</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-bordered align-middle">
+                    <thead class="table-dark small text-center">
+                        <tr>
+                            <th style="width: 80px;">PARTIDA</th>
+                            <th style="width: 120px;">CÓDIGO</th>
+                            <th>DESCRIPCIÓN</th>
+                            <th style="width: 250px;">OBSERVACIÓN / LINK WEB</th>
+                            <th style="width: 70px;">UND</th>
+                            <th style="width: 80px;">CANT.</th>
+                            <th style="width: 90px;">ACCIONES</th>
+                        </tr>
+                    </thead>
+                    <tbody id="cuerpoTablaReq">
+                        <tr>
+                            <td><input type="text" class="form-control form-control-sm inp-partida" placeholder="N°"></td>
+                            <td><input type="text" class="form-control form-control-sm inp-codigo" placeholder="Código"></td>
+                            <td><input type="text" class="form-control form-control-sm inp-desc" list="listaProductos" placeholder="Producto"></td>
+                            <td><input type="text" class="form-control form-control-sm inp-observacion" placeholder="Link o nota adicional"></td>
+                            <td><input type="text" class="form-control form-control-sm inp-und"></td>
+                            <td><input type="number" class="form-control form-control-sm inp-cant" value="1"></td>
+                            <td class="text-center">
+                                <div class="btn-group">
+                                    <button class="btn btn-sm text-primary btn-editar" title="Editar fila"><i class="bi bi-pencil-square"></i></button>
+                                    <button class="btn btn-sm text-danger btn-eliminar" title="Eliminar fila"><i class="bi bi-trash"></i></button>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <datalist id="listaProductos"></datalist>
+            
+            <div class="d-flex justify-content-between mt-3">
+                <button id="btnAgregarFila" class="btn btn-sm btn-outline-primary"><i class="bi bi-plus-circle"></i> Agregar Item</button>
+                <button id="btnGuardarReq" class="btn btn-primary shadow px-4 fw-bold">GENERAR REQUERIMIENTO</button>
+            </div>
+        </div>
+    </main>
+
+    <!-- Scripts de Lógica y Seguridad -->
+    <script type="module">
+        import { auth, db } from '../js/config.js';
+        import { signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        const listaMenu = document.getElementById('listaMenuDinamico');
+
+        onAuthStateChanged(auth, async (user) => {
+            if (!user) {
+                window.location.href = '../index.html';
+            } else {
+                // Consultar Rol para el menú dinámico
+                try {
+                    const docRef = doc(db, "usuarios", user.uid);
+                    const docSnap = await getDoc(docRef);
+                    if (docSnap.exists()) {
+                        const rol = docSnap.data().rol.toLowerCase();
+                        renderizarMenu(rol);
+                    }
+                } catch (e) {
+                    console.error("Error obteniendo rol:", e);
+                }
+            }
+        });
+
+        function renderizarMenu(rol) {
+            let items = '';
+            if (rol === 'admin') {
+                items = `
+                    <li><a class="dropdown-item" href="menu.html"><i class="bi bi-house"></i> Inicio Admin</a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item" href="requerimiento.html"><i class="bi bi-plus-circle"></i> Generar RQ</a></li>
+                    <li><a class="dropdown-item" href="historial_reque.html"><i class="bi bi-archive"></i> Historial RQ</a></li>
+                    <li><a class="dropdown-item" href="orden.html"><i class="bi bi-cart"></i> Generar OC</a></li>
+                    <li><a class="dropdown-item" href="historial.html"><i class="bi bi-clipboard-data"></i> Historial OC</a></li>
+                    <li><a class="dropdown-item" href="orden_servicio.html"><i class="bi bi-tools"></i> Generar OS</a></li>
+                    <li><a class="dropdown-item" href="historial_os.html"><i class="bi bi-clock-history"></i> Historial OS</a></li>
+                    <li><a class="dropdown-item" href="guia.html"><i class="bi bi-truck"></i> Generar Guía</a></li>
+                    <li><a class="dropdown-item" href="historial2.html"><i class="bi bi-receipt"></i> Historial Guías</a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item" href="productos.html"><i class="bi bi-box-seam"></i> Productos</a></li>
+                    <li><a class="dropdown-item" href="configuracion.html"><i class="bi bi-sliders"></i> Configuración OC / OS</a></li>
+                `;
+            } else {
+                items = `
+                <li><a class="dropdown-item" href="menu2.html"><i class="bi bi-house"></i> Inicio Editor</a></li>
+                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item" href="requerimiento.html"><i class="bi bi-plus-circle"></i> Generar RQ</a></li>
+                <li><a class="dropdown-item" href="historial_reque.html"><i class="bi bi-archive"></i> Historial RQ</a></li>
+                <li><a class="dropdown-item" href="historial2.html"><i class="bi bi-receipt"></i> Historial Guías</a></li>
+                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item" href="productos.html"><i class="bi bi-box-seam"></i> Productos</a></li>
+            `;
+            }
+            listaMenu.innerHTML = items;
+        }
+
+        document.getElementById('btnCerrarSesion').addEventListener('click', async () => {
+            await signOut(auth);
+            window.location.href = '../index.html';
+        });
+    </script>
+    
+    <!-- Scripts de funcionalidad de la página -->
+    <script type="module" src="../js/requerimiento.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
