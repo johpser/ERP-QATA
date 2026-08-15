@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Administración / Configuración del sistema - QATA</title>
+    <link rel="icon" type="image/png" href="../imagenes/icono.png">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <style>
+        body { background:#f4f7f6; padding-top:85px; font-family:'Segoe UI',sans-serif; }
+        .navbar { background:#fff; box-shadow:0 2px 10px rgba(0,0,0,.06); }
+        .panel { max-width:1200px; margin:auto; background:#fff; border-radius:14px; padding:28px; box-shadow:0 8px 30px rgba(0,0,0,.08); }
+        .section-title { border-left:5px solid #0d6efd; padding:8px 12px; background:#f8f9fa; color:#064b91; font-size:.9rem; font-weight:700; text-transform:uppercase; margin:25px 0 15px; }
+        .form-label { font-size:.76rem; font-weight:700; color:#555; text-transform:uppercase; }
+        textarea { min-height:110px; }
+        #terminosCondiciones { min-height:440px; font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size:.78rem; line-height:1.4; }
+        .mini-table input { min-width:160px; }
+
+        .permission-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:10px; }
+        .permission-card { display:flex; gap:10px; align-items:flex-start; border:1px solid #dee2e6; border-radius:10px; padding:10px 12px; background:#fff; margin:0; cursor:pointer; }
+        .permission-card:has(input:checked) { border-color:#86b7fe; background:#f5f9ff; }
+        .permission-card .form-check-input { margin-left:0; margin-top:.2rem; flex:0 0 auto; }
+        .sticky-actions { position:sticky; bottom:12px; z-index:10; background:rgba(255,255,255,.96); border:1px solid #dee2e6; border-radius:12px; padding:12px; box-shadow:0 6px 20px rgba(0,0,0,.08); }
+    </style>
+</head>
+<body>
+<nav class="navbar fixed-top">
+    <div class="container-fluid px-4 py-2">
+        <a href="menu.html" class="navbar-brand"><img src="../imagenes/LOGOQATA.png" alt="QATA" style="height:40px"></a>
+        <div class="d-flex gap-2 align-items-center">
+            <span class="fw-bold text-secondary d-none d-md-inline">ADMINISTRACIÓN / CONFIGURACIÓN</span>
+            <a href="menu.html" class="btn btn-outline-secondary btn-sm"><i class="bi bi-house"></i> Inicio</a>
+            <button id="btnCerrarSesion" class="btn btn-outline-danger btn-sm"><i class="bi bi-box-arrow-right"></i> Salir</button>
+        </div>
+    </div>
+</nav>
+
+<main class="container mb-5">
+    <div class="panel">
+        <div class="d-flex flex-wrap justify-content-between gap-2 align-items-center">
+            <div>
+                <h3 class="fw-bold mb-1">Administración / Configuración del sistema</h3>
+                <p class="text-muted mb-0">Edita proyectos, compradores, formas de pago, parámetros de OC/OS y textos sin modificar el código.</p>
+            </div>
+            <span class="badge text-bg-light border">Supabase · Configuración ERP</span>
+        </div>
+
+        <div id="mensaje" class="alert mt-3 d-none"></div>
+
+        <h4 class="section-title">Datos de la empresa</h4>
+        <div class="row g-3">
+            <div class="col-md-6"><label class="form-label">Razón social</label><input id="empresaRazon" class="form-control"></div>
+            <div class="col-md-3"><label class="form-label">RUC</label><input id="empresaRuc" class="form-control"></div>
+            <div class="col-md-3"><label class="form-label">Teléfono</label><input id="empresaTelefono" class="form-control"></div>
+            <div class="col-md-8"><label class="form-label">Dirección</label><input id="empresaDireccion" class="form-control"></div>
+            <div class="col-md-4"><label class="form-label">Correo</label><input id="empresaCorreo" type="email" class="form-control"></div>
+        </div>
+
+        <h4 class="section-title">Proyectos y lugares de entrega</h4>
+        <div class="table-responsive">
+            <table class="table table-sm table-bordered mini-table align-middle">
+                <thead class="table-light"><tr><th style="width:30%">Proyecto</th><th>Lugar de entrega</th><th style="width:60px"></th></tr></thead>
+                <tbody id="tablaProyectos"></tbody>
+            </table>
+        </div>
+        <button id="agregarProyecto" class="btn btn-outline-primary btn-sm"><i class="bi bi-plus-circle"></i> Agregar proyecto</button>
+        <div class="row g-3 mt-1">
+            <div class="col-md-6"><label class="form-label">Proyecto predeterminado</label><select id="proyectoPredeterminado" class="form-select"></select></div>
+            <div class="col-md-6"><label class="form-label">Horario de recepción predeterminado</label><input id="horarioRecepcion" class="form-control"></div>
+        </div>
+
+        <h4 class="section-title">Compradores / solicitantes</h4>
+        <div class="table-responsive">
+            <table class="table table-sm table-bordered mini-table align-middle">
+                <thead class="table-light"><tr><th>Nombre</th><th>Teléfono</th><th>Correo</th><th style="width:60px"></th></tr></thead>
+                <tbody id="tablaCompradores"></tbody>
+            </table>
+        </div>
+        <button id="agregarComprador" class="btn btn-outline-primary btn-sm"><i class="bi bi-plus-circle"></i> Agregar comprador</button>
+
+        <section id="gestionUsuariosSection">
+        <h4 class="section-title">Usuarios, roles y módulos</h4>
+        <p class="small text-muted mb-2">Primero crea el usuario en <strong>Supabase → Authentication → Users</strong>. El rol carga una plantilla predeterminada y luego puedes agregar o quitar módulos para ese usuario.</p>
+        <div class="row g-2 align-items-end mb-3">
+            <div class="col-md-5"><label class="form-label">Correo del usuario</label><input id="usuarioRolEmail" type="email" class="form-control" placeholder="usuario@grupoqata.pe"></div>
+            <div class="col-md-4"><label class="form-label">Rol base</label><select id="usuarioRolSelect" class="form-select"><option value="comprador">Comprador</option><option value="admin_obra">Administrador de Obra</option><option value="admin">Administrador principal</option></select></div>
+            <div class="col-md-3 d-grid gap-2"><button id="btnAsignarRol" type="button" class="btn btn-primary"><i class="bi bi-person-check"></i> Guardar acceso</button><button id="btnRestaurarPermisosRol" type="button" class="btn btn-outline-secondary btn-sm">Restaurar plantilla del rol</button></div>
+        </div>
+        <div class="alert alert-light border small py-2 mb-3">
+            <strong>Comprador:</strong> todo menos Administración / Configuración. &nbsp;
+            <strong>Administrador de Obra:</strong> Requerimientos, Historial RQ, Historial Guías, Historial OS y Productos. &nbsp;
+            <strong>Administrador principal:</strong> acceso total.
+        </div>
+        <div class="mb-3">
+            <div class="d-flex justify-content-between align-items-center mb-2"><label class="form-label mb-0">Módulos habilitados para este usuario</label><span id="notaPermisosRol" class="small text-muted"></span></div>
+            <div id="usuarioModulos" class="permission-grid"></div>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-sm table-bordered align-middle">
+                <thead class="table-light"><tr><th>Correo</th><th>Rol ERP</th><th>Módulos</th><th>Actualizado</th><th></th></tr></thead>
+                <tbody id="tablaUsuariosRoles"><tr><td colspan="5" class="text-center text-muted py-3">Cargando usuarios...</td></tr></tbody>
+            </table>
+        </div>
+        </section>
+
+        <h4 class="section-title">Formas de pago</h4>
+        <div class="table-responsive">
+            <table class="table table-sm table-bordered mini-table align-middle" style="max-width:650px">
+                <thead class="table-light"><tr><th>Forma de pago</th><th style="width:60px"></th></tr></thead>
+                <tbody id="tablaPagos"></tbody>
+            </table>
+        </div>
+        <button id="agregarPago" class="btn btn-outline-primary btn-sm"><i class="bi bi-plus-circle"></i> Agregar forma de pago</button>
+
+        <h4 class="section-title">Documentación obligatoria de OC</h4>
+        <textarea id="documentacionObligatoria" class="form-control"></textarea>
+
+        <h4 class="section-title">Numeración / correlativos</h4>
+        <p class="small text-muted mb-3">Aquí defines desde qué número comenzará cada documento. Por ejemplo, si colocas <strong>1250</strong> como próximo número de OC, la siguiente orden será <strong>OC-1250</strong> con la configuración predeterminada. El sistema evita reutilizar un número ya emitido.</p>
+        <div class="alert alert-warning py-2 small"><i class="bi bi-exclamation-triangle me-1"></i> Cambia el próximo número solo cuando necesites continuar una numeración existente o iniciar una nueva serie.</div>
+        <div class="table-responsive">
+            <table class="table table-sm table-bordered align-middle">
+                <thead class="table-light"><tr><th>Documento</th><th>Prefijo</th><th>Próximo número</th><th>Dígitos</th><th>Sufijo</th><th>Vista previa</th></tr></thead>
+                <tbody>
+                    <tr><td class="fw-bold">Orden de Compra</td><td><input id="ocPrefijo" class="form-control form-control-sm" value="OC-"></td><td><input id="ocSiguiente" type="number" min="1" step="1" class="form-control form-control-sm" value="1"></td><td><input id="ocDigitos" type="number" min="1" max="12" class="form-control form-control-sm" value="4"></td><td><input id="ocSufijo" class="form-control form-control-sm"></td><td><span id="previewOC" class="badge text-bg-primary fs-6">OC-0001</span></td></tr>
+                    <tr><td class="fw-bold">Orden de Servicio</td><td><input id="osPrefijoNumero" class="form-control form-control-sm"></td><td><input id="osSiguiente" type="number" min="1" step="1" class="form-control form-control-sm" value="1"></td><td><input id="osDigitos" type="number" min="1" max="12" class="form-control form-control-sm" value="7"></td><td><input id="osSufijoNumero" class="form-control form-control-sm" value="D"></td><td><span id="previewOS" class="badge text-bg-success fs-6">0000001D</span></td></tr>
+                    <tr><td class="fw-bold">Guía manual</td><td><input id="guiaPrefijo" class="form-control form-control-sm" value="GR-ALM-"></td><td><input id="guiaSiguiente" type="number" min="1" step="1" class="form-control form-control-sm" value="1"></td><td><input id="guiaDigitos" type="number" min="1" max="12" class="form-control form-control-sm" value="4"></td><td><input id="guiaSufijo" class="form-control form-control-sm"></td><td><span id="previewGUIA" class="badge text-bg-secondary fs-6">GR-ALM-0001</span></td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h4 class="section-title">Valores predeterminados de Orden de Servicio</h4>
+        <p class="small text-muted">Se cargan automáticamente al abrir Generar OS, pero siguen siendo editables en cada orden.</p>
+        <div class="row g-3">
+            
+            <div class="col-md-4"><label class="form-label">Clasificación OS</label><input id="osClasificacion" class="form-control"></div>
+            <div class="col-md-2"><label class="form-label">Porcentaje</label><input id="osPorcentaje" class="form-control"></div>
+            <div class="col-md-4"><label class="form-label">Moneda</label><input id="osMoneda" class="form-control"></div>
+            <div class="col-md-6"><label class="form-label">Aprobador OS</label><input id="osAprobadorNombre" class="form-control"></div>
+            <div class="col-md-6"><label class="form-label">Cargo aprobador</label><input id="osAprobadorCargo" class="form-control"></div>
+            <div class="col-md-4"><label class="form-label">Tipología</label><input id="osTipologia" class="form-control"></div>
+            <div class="col-md-8"><label class="form-label">Lugar de entrega base</label><input id="osLugarEntrega" class="form-control"></div>
+            <div class="col-12"><label class="form-label">Condición de pago OS</label><textarea id="osCondicionPago" class="form-control"></textarea></div>
+            <div class="col-md-6"><label class="form-label">Horario recepción facturas / mercancías</label><textarea id="osHorarioFacturas" class="form-control"></textarea></div>
+            <div class="col-md-6"><label class="form-label">Horario recepción en obra / proyecto</label><textarea id="osHorarioObra" class="form-control"></textarea></div>
+            <div class="col-md-6"><label class="form-label">Requisitos mínimos de ingreso</label><textarea id="osRequisitosIngreso" class="form-control" style="min-height:170px"></textarea></div>
+            <div class="col-md-6"><label class="form-label">Documentos / requisitos obligatorios OS</label><textarea id="osDocumentosEntrega" class="form-control" style="min-height:170px"></textarea></div>
+        </div>
+
+        <h4 class="section-title">Términos y condiciones de OC / OS</h4>
+        <p class="small text-muted">Este texto se guarda como una copia dentro de cada OC/OS al momento de emitirla. Así, si luego editas las condiciones, las órdenes antiguas conservan las que estaban vigentes cuando se generaron.</p>
+        <textarea id="terminosCondiciones" class="form-control" spellcheck="false"></textarea>
+
+        <div class="sticky-actions mt-4 d-flex flex-wrap gap-2 justify-content-end">
+            <button id="btnRestaurar" class="btn btn-outline-secondary"><i class="bi bi-arrow-counterclockwise"></i> Cargar valores iniciales</button>
+            <button id="btnGuardar" class="btn btn-success px-4"><i class="bi bi-cloud-check"></i> Guardar configuración</button>
+        </div>
+    </div>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script type="module" src="../js/admin-config.js"></script>
+
+<script type="module" src="../js/seguridad.js"></script>
+</body>
+</html>
